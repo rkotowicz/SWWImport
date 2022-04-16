@@ -3,3 +3,4 @@ obj/
 data/
 TestSelect.sql
 input.xml
+secrets.json

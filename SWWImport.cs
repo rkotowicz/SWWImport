@@ -58,7 +58,7 @@ public class SWWImport
 	static Random rnd = new Random();
 
 
-	public static void ReadFileForStats(string fileName) {
+	public static void ReadFileForStatsNew(string fileName) {
 		XmlReaderSettings settings = new XmlReaderSettings();
 		settings.ValidationType = ValidationType.None;
 		settings.ConformanceLevel = ConformanceLevel.Fragment;
@@ -66,7 +66,7 @@ public class SWWImport
 		using (XmlReader xReader = XmlReader.Create(fileName, settings)) {
 			Dictionary<string, List<string>> allValues = new Dictionary<string, List<string>>();
 			Dictionary<string, int> counterDic = new Dictionary<string, int>();
-			while(xReader.ReadToFollowing("GsmSession")) {
+			while(xReader.ReadToFollowing("Session")) {
 				using(XmlReader oReader = xReader.ReadSubtree()) {
 					if(oReader.ReadToDescendant("SessionID")) {
 						var obj = new GsmSession();
@@ -147,11 +147,11 @@ public class SWWImport
 										break;
 									case "LAC": 
 										break;
-									case "CellID": 
+									case "CellId": 
 										break;
 									case "index":
 										break;
-									case "dir":
+									case "Dir":
 										if(!allValues.ContainsKey(fieldName)) {
 											allValues[fieldName] = new List<string>();
 										}
@@ -226,16 +226,16 @@ public class SWWImport
 			}
 
 			Console.WriteLine($"Analiza pliku:  {fileName.Substring(fileName.LastIndexOf('/')+1)}");
-			string fname = "SessionID";
-			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["SessionID"]} %");
+			string fname = "sessionID";
+			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 			fname = "IMSI";
-			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["SessionID"]} %");
+			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 			fname = "TMSI";
-			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["SessionID"]} %");
+			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 			fname = "IMEI";
-			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["SessionID"]} %");
+			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 			fname = "MSISDN";
-			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["SessionID"]} %");
+			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 		}
 	}
 
@@ -762,6 +762,8 @@ ALTER INDEX [IMSIIdx] ON [dbo].[GsmSessions] REBUILD PARTITION = ALL WITH (PAD_I
 //		TestSqlInsert();
 //		TestSqlSelect();
 //		ReadFile(args[0]);
-		ReadFileForStatsOld(args[0]);
+//		ReadFileForStatsOld(args[0]);
+		ReadFileForStatsNew(args[0]);
+		Console.ReadLine();
 	}
 }

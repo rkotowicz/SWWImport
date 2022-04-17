@@ -6,15 +6,17 @@
             // Use hover for the description of the existing attributes
             // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
             "name": ".NET Launch (console)",
-            "type": "clr",
+            "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/net4.8/SWWImport.exe",
-            "args": ["d:\\Copy\\Biegly\\Info\\_MyOwn\\Work\\SWWImport\\input.xml"],
-            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/bin/Debug/net6.0/SWWImport.dll",
+//            "args": ["d:\\Copy\\Biegly\\Info\\_MyOwn\\Work\\SWWImport\\input.xml"],
+            "args": ["d:\\Copy\\Biegly\\Info\\_MyOwn\\Work\\SWWImport\\data\\KAL 20220301-20220401.xml"],
+//            "args": ["d:\\Copy\\Biegly\\Info\\_MyOwn\\Work\\SWWImport\\data\\BIA 20220301-20220401.xml"],
+           "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "internalConsole",
+            "console": "externalTerminal",
             "stopAtEntry": false
         },
         {

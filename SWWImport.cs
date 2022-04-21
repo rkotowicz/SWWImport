@@ -15,8 +15,6 @@ public class SWWImport
 		public UInt32 SessionID;
 		// 14 - 15 chars
 		public string IMSI;
-		public string TMSI;
-		public string IMEI;
 		public string MSISDN;
 		// Mobile Country Code [3]
 		public string MCC;
@@ -42,14 +40,86 @@ public class SWWImport
 			ses.Time = DateTime.Now.AddMinutes(-rnd.NextDouble()*60*24*100);
 			ses.SessionID = (UInt32)rnd.Next();
 			ses.IMSI = Math.Truncate(rnd.NextDouble()*1000000000000).ToString();
-			ses.TMSI = "";
-			ses.IMEI = "";
 			ses.MSISDN = "";
 			ses.MCC = ((UInt32) Math.Truncate(rnd.NextDouble()*1000)).ToString();
 			ses.MNC = ((UInt32) Math.Truncate(rnd.NextDouble()*1000)).ToString();
 			ses.LAC = (UInt16)(rnd.Next() >> 16);
 			ses.CellID = (UInt32)rnd.Next();
 			return ses;
+		}
+
+		public static IEnumerable<GsmSession> EnumerateFromFile(string fileName) {
+			var FieldNames = new Dictionary<string, string> { 
+				{"GsmSession", "Session"}, 
+				{"SessionID", "SessionID" }, 
+				{"Time", "Time" } 
+			};
+			if(String.IsNullOrEmpty(fileName)) { throw new ArgumentNullException("fileName not initialized"); }
+
+			XmlReaderSettings settings = new XmlReaderSettings();
+			settings.ValidationType = ValidationType.None;
+			settings.ConformanceLevel = ConformanceLevel.Fragment;
+
+			using (XmlReader xReader = XmlReader.Create(fileName, settings)) {
+				while(xReader.ReadToFollowing(FieldNames["GsmSession"])) {
+					using(XmlReader oReader = xReader.ReadSubtree()) {
+						if(oReader.ReadToDescendant(FieldNames["SessionID"])) {
+							string s;
+							DateTime dt;
+							var obj = new GsmSession();
+							int i = oReader.ReadElementContentAsInt();
+							if(i < 0) { throw new Exception("session id < 0"); }
+							obj.SessionID = (UInt32) i;
+
+							while (oReader.Read())
+							{
+								if (oReader.NodeType == XmlNodeType.Element)
+									switch (oReader.Name)
+									{
+										case "Time": 
+											s = oReader.ReadElementContentAsString();
+											dt = DateTime.Parse(s);
+											obj.Time = dt;
+											break;
+										case "IMSI": 
+											s = oReader.ReadElementContentAsString();
+											obj.IMSI = s;
+											break;
+										case "TMSI": 
+											break;
+										case "IMEI": 
+											break;
+										case "MSISDN": 
+											s = oReader.ReadElementContentAsString();
+											obj.MSISDN = s;
+											break;
+										case "MCC": 
+											s = oReader.ReadElementContentAsString();
+											obj.MCC = s;
+											break;
+										case "MNC": 
+											s = oReader.ReadElementContentAsString();
+											obj.MNC = s;
+											break;
+										case "LAC": 
+											i = oReader.ReadElementContentAsInt();
+											if(i < 0) { throw new Exception("LAC < 0"); }
+											obj.LAC = (UInt16) i;
+											break;
+										case "CellId": 
+											i = oReader.ReadElementContentAsInt();
+											if(i < 0) { throw new Exception("cellid < 0"); }
+											obj.CellID =(UInt32) i;
+											break;
+								}
+							}
+							if(String.IsNullOrEmpty(obj.IMSI)) { continue; }
+							Console.WriteLine($"{GsmSession.DateTimeToString(obj.Time)} {obj.SessionID} {obj.CellID} {obj.IMSI}");
+							yield return obj;
+						}
+					}
+				}
+			}
 		}
 
 
@@ -106,28 +176,8 @@ public class SWWImport
 										}
 										break;
 									case "TMSI": 
-										if(!allValues.ContainsKey(fieldName)) {
-											allValues[fieldName] = new List<string>();
-											counterDic[fieldName] = 0;
-										}
-										s = oReader.ReadElementContentAsString();
-										obj.TMSI = s;
-										if(!String.IsNullOrWhiteSpace(s)) {	counterDic[fieldName]++; }
-										if(!allValues[fieldName].Contains(s)) {
-											allValues[fieldName].Add(s);
-										}
 										break;
 									case "IMEI": 
-										if(!allValues.ContainsKey(fieldName)) {
-											allValues[fieldName] = new List<string>();
-											counterDic[fieldName] = 0;
-										}
-										s = oReader.ReadElementContentAsString();
-										obj.IMEI = s;
-										if(!String.IsNullOrWhiteSpace(s)) {	counterDic[fieldName]++; }
-										if(!allValues[fieldName].Contains(s)) {
-											allValues[fieldName].Add(s);
-										}
 										break;
 									case "MSISDN": 
 										if(!allValues.ContainsKey(fieldName)) {
@@ -210,9 +260,9 @@ public class SWWImport
 								}
 							}
 						}
-						if(!String.IsNullOrWhiteSpace(obj.TMSI) && !(String.IsNullOrWhiteSpace(obj.IMEI) || String.IsNullOrWhiteSpace(obj.IMSI) || String.IsNullOrWhiteSpace(obj.MSISDN))) 
+						if((String.IsNullOrWhiteSpace(obj.IMSI) || String.IsNullOrWhiteSpace(obj.MSISDN))) 
 						{
-							Console.WriteLine($"Session TMSI={obj.TMSI} found id:{obj.SessionID} imei:{obj.IMEI} imsi:{obj.IMSI} msisdn:{obj.MSISDN}");
+							Console.WriteLine($"Session found id:{obj.SessionID} imsi:{obj.IMSI} msisdn:{obj.MSISDN}");
 						}
 					}
 				}
@@ -229,10 +279,6 @@ public class SWWImport
 			string fname = "sessionID";
 			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 			fname = "IMSI";
-			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
-			fname = "TMSI";
-			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
-			fname = "IMEI";
 			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 			fname = "MSISDN";
 			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
@@ -289,28 +335,8 @@ public class SWWImport
 										}
 										break;
 									case "TMSI": 
-										if(!allValues.ContainsKey(fieldName)) {
-											allValues[fieldName] = new List<string>();
-											counterDic[fieldName] = 0;
-										}
-										s = oReader.ReadElementContentAsString();
-										obj.TMSI = s;
-										if(!String.IsNullOrWhiteSpace(s)) {	counterDic[fieldName]++; }
-										if(!allValues[fieldName].Contains(s)) {
-											allValues[fieldName].Add(s);
-										}
 										break;
 									case "IMEI": 
-										if(!allValues.ContainsKey(fieldName)) {
-											allValues[fieldName] = new List<string>();
-											counterDic[fieldName] = 0;
-										}
-										s = oReader.ReadElementContentAsString();
-										obj.IMEI = s;
-										if(!String.IsNullOrWhiteSpace(s)) {	counterDic[fieldName]++; }
-										if(!allValues[fieldName].Contains(s)) {
-											allValues[fieldName].Add(s);
-										}
 										break;
 									case "MSISDN": 
 										if(!allValues.ContainsKey(fieldName)) {
@@ -414,19 +440,6 @@ public class SWWImport
 								}
 							}
 						}
-						if(!String.IsNullOrEmpty(obj.TMSI) && !(String.IsNullOrEmpty(obj.IMEI) && String.IsNullOrEmpty(obj.IMSI) && String.IsNullOrEmpty(obj.MSISDN))) 
-						{
-							if(!msisdnDigits.IsMatch(obj.IMSI)) {
-								if(!String.IsNullOrEmpty(obj.IMSI)) {
-									tmsiDic[obj.TMSI] = obj.IMSI;
-								} else {
-									if(tmsiDic.ContainsKey(obj.TMSI)) {
-										obj.IMSI = tmsiDic[obj.TMSI];
-									Console.WriteLine($"Session with only TMSI={obj.TMSI} found id:{obj.SessionID} imei:{obj.IMEI} imsi:{obj.IMSI} msisdn:{obj.MSISDN}");
-									}
-								}
-							}
-						}
 					}
 				}
 			}
@@ -443,17 +456,13 @@ public class SWWImport
 			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 			fname = "IMSI";
 			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
-			fname = "TMSI";
-			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
-			fname = "IMEI";
-			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 			fname = "MSISDN";
 			Console.WriteLine($"Pole: {fname}: {counterDic[fname]} ({allValues[fname].Count}) {counterDic[fname] * 100 / counterDic["sessionID"]} %");
 		}
 		Console.ReadLine();
 	}
 
-	public static void ReadFile(string fileName) {
+	public static void ReadFileOld(string fileName) {
 		XmlReaderSettings settings = new XmlReaderSettings();
 		settings.ValidationType = ValidationType.None;
 		settings.ConformanceLevel = ConformanceLevel.Fragment;
@@ -484,12 +493,8 @@ public class SWWImport
 										obj.IMSI = s;
 										break;
 									case "TMSI": 
-										s = oReader.ReadElementContentAsString();
-										obj.TMSI = s;
 										break;
 									case "IMEI": 
-										s = oReader.ReadElementContentAsString();
-										obj.IMEI = s;
 										break;
 									case "MSISDN": 
 										s = oReader.ReadElementContentAsString();
@@ -583,8 +588,6 @@ INSERT INTO [dbo].[GsmSessions]
 	([Time]
 	,[SessionID]
 	,[IMSI]
-	,[TMSI]
-	,[IMEI]
 	,[MSISDN]
 	,[MCC]
 	,[MNC]
@@ -594,8 +597,6 @@ VALUES
 	(@time
 	,@sessionid
 	,@imsi
-	,@tmsi
-	,@imei
 	,@msisdn
 	,@mcc
 	,@mnc
@@ -617,8 +618,6 @@ VALUES
 		sqlCommand.Parameters["@time"].Value = ses.Time;
 		sqlCommand.Parameters["@sessionid"].Value = ses.SessionID;
 		sqlCommand.Parameters["@imsi"].Value = String.IsNullOrEmpty(ses.IMSI) ? 0 : UInt64.Parse(ses.IMSI);
-		sqlCommand.Parameters["@tmsi"].Value = String.IsNullOrEmpty(ses.TMSI) ? 0 : UInt64.Parse(ses.TMSI);
-		sqlCommand.Parameters["@imei"].Value = String.IsNullOrEmpty(ses.IMEI) ? 0 : UInt64.Parse(ses.IMEI);
 		sqlCommand.Parameters["@msisdn"].Value = String.IsNullOrEmpty(ses.MSISDN) ? 0 : UInt64.Parse(ses.MSISDN);
 		sqlCommand.Parameters["@mcc"].Value = ses.MCC;
 		sqlCommand.Parameters["@mnc"].Value = ses.MNC;
@@ -665,12 +664,6 @@ VALUES
 
 			SqlParameter pIMSI = new SqlParameter("@imsi", System.Data.SqlDbType.BigInt);
 			sqlCommand.Parameters.Add(pIMSI);
-
-			SqlParameter pTMSI = new SqlParameter("@tmsi", System.Data.SqlDbType.BigInt);
-			sqlCommand.Parameters.Add(pTMSI);
-
-			SqlParameter pIMEI = new SqlParameter("@imei", System.Data.SqlDbType.BigInt);
-			sqlCommand.Parameters.Add(pIMEI);
 
 			SqlParameter pMSISDN = new SqlParameter("@msisdn", System.Data.SqlDbType.BigInt);
 			sqlCommand.Parameters.Add(pMSISDN);
@@ -755,15 +748,62 @@ ALTER INDEX [IMSIIdx] ON [dbo].[GsmSessions] REBUILD PARTITION = ALL WITH (PAD_I
 		SQLexec(sql);
 	}
 
+	public static void ProcessFile(string fname) 
+	{
+		DisableIndexes();
+		Stopwatch stopwatch = new Stopwatch();
+ 		try
+		{
+			Console.WriteLine("\nProcessFile started:");
+			Console.WriteLine("=========================================\n");
+			
+			using (sqlConnection = new SqlConnection(sqlConnStrBuilder.ConnectionString))
+			{
+				sqlConnection.Open();
+				using (sqlCommand = new SqlCommand(sqlInsert, sqlConnection))
+				{				
+					SqlPrepareInsertCommandAndParameters();
+ 					stopwatch.Start();
+ 					
+					foreach (var gsmSession in GsmSession.EnumerateFromFile(fname)) 
+					{
+						try{
+							SessionSetInsertParameters(gsmSession);
+							sqlCommand.ExecuteNonQuery();
+						}
+						catch (SqlException e)
+						{
+							Console.WriteLine(gsmSession.ToString());
+							Console.WriteLine(e.ToString());
+						}
+					}
+				}
+			}
+		}
+		catch (SqlException e)
+		{
+			Console.WriteLine(e.ToString());
+		}
+		stopwatch.Stop();
+ 
+		TimeSpan ts = stopwatch.Elapsed;
+ 		Console.WriteLine("Elapsed Time is {0:00}:{1:00}:{2:00}.{3}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
+		
+		EnableIndexes();
+	}
+
 	public static void Main(string[] args)
 	{
 		Console.WriteLine($"Hello world! {args[0]} ");
-//		SqlInit();
+		SqlInit();
 //		TestSqlInsert();
 //		TestSqlSelect();
 //		ReadFile(args[0]);
 //		ReadFileForStatsOld(args[0]);
-		ReadFileForStatsNew(args[0]);
+//		ReadFileForStatsNew(args[0]);
+//		ReadFileNew(args[0]);
+		ProcessFile(args[0]);
+		Console.WriteLine("Program END");
 		Console.ReadLine();
 	}
 }

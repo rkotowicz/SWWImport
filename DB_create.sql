@@ -1,21 +1,18 @@
 USE [master]
 GO
-/****** Object:  Database [SWW1]    Script Date: 28.02.2022 09:44:23 ******/
-
-
-/****** Object:  Database [SWW1]    Script Date: 27.02.2022 21:56:07 ******/
+/****** Object:  Database [SWW1]    Script Date: 21.04.2022 13:13:14 ******/
 CREATE DATABASE [SWW1]
  CONTAINMENT = NONE
  ON  PRIMARY 
-( NAME = N'SWW1', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1.mdf' , SIZE = 65535KB , MAXSIZE = UNLIMITED, FILEGROWTH = 50%), 
+( NAME = N'SWW1', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1.mdf' , SIZE = 65536KB , MAXSIZE = UNLIMITED, FILEGROWTH = 50%), 
  FILEGROUP [P2] 
-( NAME = N'SWW1_2', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1_2.mdf' , SIZE = 65535KB , MAXSIZE = UNLIMITED, FILEGROWTH = 50%), 
+( NAME = N'SWW1_2', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1_2.mdf' , SIZE = 746496KB , MAXSIZE = UNLIMITED, FILEGROWTH = 50%), 
  FILEGROUP [P3] 
-( NAME = N'SWW1_3', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1_3.mdf' , SIZE = 65535KB , MAXSIZE = UNLIMITED, FILEGROWTH = 50%), 
+( NAME = N'SWW1_3', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1_3.mdf' , SIZE = 746496KB , MAXSIZE = UNLIMITED, FILEGROWTH = 50%), 
  FILEGROUP [P4] 
-( NAME = N'SWW1_4', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1_4.mdf' , SIZE = 65535KB , MAXSIZE = UNLIMITED, FILEGROWTH = 50%)
+( NAME = N'SWW1_4', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1_4.mdf' , SIZE = 746496KB , MAXSIZE = UNLIMITED, FILEGROWTH = 50%)
  LOG ON 
-( NAME = N'SWW1_log', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1_log.ldf' , SIZE = 65535KB , MAXSIZE = 2048GB , FILEGROWTH = 50% )
+( NAME = N'SWW1_log', FILENAME = N'D:\SQL\MSSQL15.MSSQLSERVER\MSSQL\DATA\SWW1_log.ldf' , SIZE = 8503104KB , MAXSIZE = 2048GB , FILEGROWTH = 50%)
  WITH CATALOG_COLLATION = DATABASE_DEFAULT
 GO
 ALTER DATABASE [SWW1] SET COMPATIBILITY_LEVEL = 150
@@ -93,13 +90,13 @@ ALTER DATABASE SCOPED CONFIGURATION SET LEGACY_CARDINALITY_ESTIMATION = ON;
 GO
 USE [SWW1]
 GO
-/****** Object:  PartitionFunction [SessionTimePartFn]    Script Date: 27.02.2022 21:56:07 ******/
+/****** Object:  PartitionFunction [SessionTimePartFn]    Script Date: 21.04.2022 13:13:14 ******/
 CREATE PARTITION FUNCTION [SessionTimePartFn](datetime) AS RANGE LEFT FOR VALUES (N'2021-12-27T00:00:00.000', N'2022-01-27T00:00:00.000', N'2022-02-27T00:00:00.000')
 GO
-/****** Object:  PartitionScheme [SessionTimePartSch]    Script Date: 27.02.2022 21:56:07 ******/
+/****** Object:  PartitionScheme [SessionTimePartSch]    Script Date: 21.04.2022 13:13:14 ******/
 CREATE PARTITION SCHEME [SessionTimePartSch] AS PARTITION [SessionTimePartFn] TO ([P4], [P3], [P2], [PRIMARY])
 GO
-/****** Object:  Table [dbo].[GsmSessions]    Script Date: 27.02.2022 21:56:07 ******/
+/****** Object:  Table [dbo].[GsmSessions]    Script Date: 21.04.2022 13:13:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -109,8 +106,6 @@ CREATE TABLE [dbo].[GsmSessions](
 	[Time] [datetime] NOT NULL,
 	[SessionID] [int] NOT NULL,
 	[IMSI] [bigint] NOT NULL,
-	[TMSI] [bigint] NOT NULL,
-	[IMEI] [bigint] NOT NULL,
 	[MSISDN] [bigint] NOT NULL,
 	[MCC] [char](3) NOT NULL,
 	[MNC] [char](5) NOT NULL,
@@ -120,7 +115,7 @@ CREATE TABLE [dbo].[GsmSessions](
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [BTSIdx]    Script Date: 27.02.2022 21:56:07 ******/
+/****** Object:  Index [BTSIdx]    Script Date: 21.04.2022 13:13:14 ******/
 CREATE NONCLUSTERED INDEX [BTSIdx] ON [dbo].[GsmSessions]
 (
 	[MCC] ASC,
@@ -129,17 +124,59 @@ CREATE NONCLUSTERED INDEX [BTSIdx] ON [dbo].[GsmSessions]
 	[CellID] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [SessionTimePartSch]([Time])
 GO
-/****** Object:  Index [IMSIIdx]    Script Date: 27.02.2022 21:56:07 ******/
+/****** Object:  Index [IMSIIdx]    Script Date: 21.04.2022 13:13:14 ******/
 CREATE NONCLUSTERED INDEX [IMSIIdx] ON [dbo].[GsmSessions]
 (
 	[IMSI] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [SessionTimePartSch]([Time])
 GO
-/****** Object:  Index [TimeIdx]    Script Date: 27.02.2022 21:56:07 ******/
+/****** Object:  Index [TimeIdx]    Script Date: 21.04.2022 13:13:14 ******/
 CREATE NONCLUSTERED INDEX [TimeIdx] ON [dbo].[GsmSessions]
 (
 	[Time] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [SessionTimePartSch]([Time])
+GO
+/****** Object:  StoredProcedure [dbo].[GetAllGsmSessions]    Script Date: 21.04.2022 13:13:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GetAllGsmSessions]
+AS
+	SET NOCOUNT ON;
+SELECT        Id, Time, SessionID, IMSI, MSISDN, MCC, MNC, LAC, CellID
+FROM            GsmSessions
+ORDER BY Time
+GO
+/****** Object:  StoredProcedure [dbo].[GsmSessionsGetPage]    Script Date: 21.04.2022 13:13:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[GsmSessionsGetPage] 
+	-- Add the parameters for the stored procedure here
+	@pagesize int = 0
+	, @pageidx int = 0
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+SELECT
+	Id, Time, SessionID, IMSI, MSISDN, MCC, MNC, LAC, CellID
+FROM
+	GsmSessions
+ORDER BY Time
+	OFFSET @pageidx * @pagesize ROWS
+	FETCH NEXT @pagesize ROWS ONLY
+END
 GO
 USE [master]
 GO

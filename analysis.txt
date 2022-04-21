@@ -1,0 +1,88 @@
+99000 sesji
+IMSI: 4702 (1125) 4,7%
+TMSI: 94202 (88792) 95%
+IMEI: 14 (11) 
+MSISDN: 38851 (7979) 39%
+SMSText: 39656 (34941)
+termination_cause: 59326 (28)
+"Abnormal release, channel unacceptable"
+"Abnormal release, unspecified"
+"Access information discarded"
+"Bearer capability not authorized"
+"Bearer capability not presently available"
+"Call rejected"
+"Channel mode unacceptable"
+"Channel unacceptable"
+"Destination out of order"
+"Facility rejected"
+"Frequency not implemented"
+"Handover out of System coverage"
+"Incoming calls barred within the CUG"
+"Incompatible destination"
+"Information element non-existent or not implemented"
+"Interworking, unspecified"
+"Invalid number format (incomplete number)"
+"Invalid transaction identifier value"
+"Message not compatible with protocol state"
+"Message type not compatible with protocol state"
+"Network out of order"
+"No call reception"
+"No circuit/channel available"
+"No route to destination"
+"No user responding"
+"Non selected user clearing"
+"Normal call clearing"
+"Normal event"
+"Normal, unspecified"
+"Number changed"
+"Only restricted digital information bearer capability is available"
+"Quality of service unavailable"
+"Protocol error unspecified"
+"Recovery on timer expiry"
+"Requested circuit/channel not available"
+"Requested facility not implemented"
+"Resources unavailable, unspecified"
+"Reuse Of TCH"
+"Service or option not available, unspecified"
+"Switching equipment congestion"
+"System Timeout"
+"Temporary failure"
+"Unknown"
+"User alerting, no answer"
+"User busy"
+
+
+Analiza pliku:  Sensor1_20211125_1107 20220110_0850 GSM_Gołdap.xml  
+Pole: sessionID: 99001 (99001) 100 %
+Pole: IMSI: 4702 (1125) 4 %
+Pole: TMSI: 94202 (88792) 95 %
+Pole: IMEI: 14 (11) 0 %
+Pole: MSISDN: 38851 (7979) 39 %
+Nov 25 2021-17 Jan 2022 (53 dni)
+
+
+
+Analiza pliku:  Sensor2_20211230_1204 20220110_0843 GSM.xml
+Pole: sessionID: 394337 (394330) 100 %
+Pole: IMSI: 139169 (4752) 35 %
+Pole: TMSI: 255095 (155589) 64 %
+Pole: IMEI: 21 (7) 0 %
+Pole: MSISDN: 16920 (4514) 4 %
+Dec 30 2021-17 Jan 2022 (18dni)
+
+
+Analiza pliku:  BIA 20220301-20220401.xml
+Pole: sessionID: 161312 (161312) 100 %
+Pole: IMSI: 12168 (3247) 7 %
+Pole: TMSI: 149010 (145144) 92 %
+Pole: IMEI: 4 (3) 0 %
+Pole: MSISDN: 3451 (1853) 2 %
+
+
+Analiza pliku:  KAL 20220301-20220401.xml
+Pole: sessionID: 259180 (259179) 100 %
+Pole: IMSI: 72215 (4568) 27 %
+Pole: TMSI: 186953 (169797) 72 %
+Pole: IMEI: 1 (2) 0 %
+Pole: MSISDN: 1333 (1078) 0 %
+
